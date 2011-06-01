@@ -6,6 +6,7 @@
  * ELF format file handling. Extended relocation support for all of
  * text and data.
  *
+ * (c) 2010  RX support Yoshinori Sato <ysato@users.sourceforge.jp>
  * (c) 2006  Support the -a (use_resolved) option for TARGET_arm.
  *           Shaun Jackman <sjackman@gmail.com>
  * (c) 2004, Nios II support, Wentao Xu <wentao@microtronix.com>
@@ -58,6 +59,8 @@ const char *elf2flt_progname;
 #include "cygwin-elf.h"	/* Cygwin uses a local copy */
 #elif defined(TARGET_microblaze)
 #include <elf/microblaze.h>	/* TARGET_* ELF support for the BFD library */
+#elif defined(TARGET_rx)
+#include <elf/rx.h> 	/* TARGET_* ELF support for the BFD library */
 #else
 #include <elf.h>      /* TARGET_* ELF support for the BFD library            */
 #endif
@@ -107,6 +110,8 @@ const char *elf2flt_progname;
 #define ARCH	"nios"
 #elif defined(TARGET_nios2)
 #define ARCH	"nios2"
+#elif defined(TARGET_rx)
+#define ARCH	"rx"
 #else
 #error "Don't know how to support your CPU architecture??"
 #endif
@@ -1343,6 +1348,22 @@ DIS29_RELOCATION:
 #undef _32BITS_RELOC
 #undef _30BITS_RELOC
 #undef _28BITS_RELOC
+#endif
+#if defined(TARGET_rx)
+				case R_RX_DIR32:
+					relocation_needed = 1;
+					sym_vma = bfd_section_vma(abs_bfd, sym_section);
+					sym_addr += sym_vma + q->addend;
+					break;
+				case R_RX_DIR24S_PCREL:
+					sym_vma = 0;
+					sym_addr = (*(q->sym_ptr_ptr))->value;
+					sym_addr += sym_vma + q->addend;
+					/* RX instruction is little endian always */
+					r_mem[0] = sym_addr & 0x000000ff;
+					r_mem[1] = (sym_addr >> 8) & 0x000000ff;
+					r_mem[2] = (sym_addr >> 16) & 0x000000ff;
+					continue;
 #endif
 				default:
 					/* missing support for other types of relocs */
