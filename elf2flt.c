@@ -722,6 +722,11 @@ dump_symbols(symbols, number_of_symbols);
 
 				    flat_reloc_count++;
 				    break;
+#elif defined(TARGET_rx)
+				case R_RX_DIR24S_PCREL:
+				    continue;
+				default:
+				    goto good_32bit_resolved_reloc;
 #else
 				default:
 					/* The default is to assume that the
@@ -1356,6 +1361,7 @@ DIS29_RELOCATION:
 					sym_addr += sym_vma + q->addend;
 					break;
 				case R_RX_DIR24S_PCREL:
+					relocation_needed = 0;
 					sym_vma = 0;
 					sym_addr = (*(q->sym_ptr_ptr))->value;
 					sym_addr += sym_vma + q->addend;
