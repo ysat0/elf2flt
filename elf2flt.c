@@ -717,6 +717,12 @@ dump_symbols(symbols, number_of_symbols);
 
 				    flat_reloc_count++;
 				    break;
+#elif defined (TARGET_sh)
+				case R_SH_DIR32:
+				    goto good_32bit_resolved_reloc;
+				case R_SH_REL32:
+				    relocation_needed = 0;
+				    break;
 #else
 				default:
 					/* The default is to assume that the
@@ -1164,10 +1170,8 @@ NIOS2_RELOC_ERR:
 					sym_addr += sym_vma + q->addend;
 					break;
 				case R_SH_REL32:
-					sym_vma = 0;
-					sym_addr += sym_vma + q->addend;
-					sym_addr -= q->address;
-					break;
+					relocation_needed = 0;
+				    	break;
 #endif /* TARGET_sh */
 
 #ifdef TARGET_e1
